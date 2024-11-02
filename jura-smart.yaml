@@ -8,7 +8,6 @@ esp8266:
   board: nodemcuv2
 
 logger:
-  level: DEBUG
 
 api:
 
@@ -22,7 +21,7 @@ wifi:
 
   ap:
     ssid: "Jura-Smart Fallback Hotspot"
-    password: "fkGotf9li4xP"
+    password: 
 
 captive_portal:
 
