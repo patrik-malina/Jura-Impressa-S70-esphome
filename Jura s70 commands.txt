@@ -1,0 +1,22 @@
+AN:01		ON
+AN:02		OFF
+
+FN:02		Rinsing
+FN:03		Powder coffe
+FN:04		1 small
+FN:05		2 small
+FN:06		1 nomal
+FN:07		2 normal
+FN:08		Hot water
+FN:09		Steam
+FN:C0		Large
+
+states
+"C404"		no_water
+"4805"		no_beans
+"C045"		no_tray
+"C444"		no_tray|no_water
+"4205"		pomace_full
+"C105"		tray_full
+"4005"		ok
+

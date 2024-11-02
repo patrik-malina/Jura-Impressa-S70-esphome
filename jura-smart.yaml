@@ -1,0 +1,183 @@
+esphome:
+  name: jura-smart
+  friendly_name: Jura Impressa S70
+  includes: 
+    - jura.h
+
+esp8266:
+  board: nodemcuv2
+
+logger:
+  level: DEBUG
+
+api:
+
+ota:
+  platform: esphome
+  
+  
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: "Jura-Smart Fallback Hotspot"
+    password: "fkGotf9li4xP"
+
+captive_portal:
+
+uart:
+  tx_pin: D6
+  rx_pin: D7
+  baud_rate: 9600
+  id: uart_bus
+
+switch:
+  - platform: template
+    name: 'Power'
+    icon: "mdi:power-cycle"
+    id: jura_on_off_switch
+    lambda: |-
+      if (id(pwr).state) {
+        return true;
+      } else {
+        return false;
+      }
+    turn_on_action:
+      - uart.write: [0xDF, 0xDB, 0xDB, 0xDF]  ## 'A'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFF, 0xDB, 0xDF]  ## 'N'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xFF, 0xDB]  ## ':'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDB, 0xFF, 0xDB]  ## '0'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xDB, 0xFF, 0xDB]  ## '1'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xFF, 0xDB, 0xDB]  ## '\r'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xDB, 0xDB]  ## '\n'
+
+    turn_off_action:
+      - uart.write: [0xDF, 0xDB, 0xDB, 0xDF]  ## 'A'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFF, 0xDB, 0xDF]  ## 'N'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xFF, 0xDB]  ## ':'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDB, 0xFF, 0xDB]  ## '0'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xDB, 0xFF, 0xDB]  ## '2'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xFF, 0xDB, 0xDB]  ## '\r'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xDB, 0xDB]  ## '\n'
+    optimistic: true
+#    assumed_state: true
+
+button:
+  - platform: template
+    name: 'Rinse'
+    icon: "mdi:water"
+    id: jura_rinse
+    on_press:
+      - uart.write: [0xFB, 0xDF, 0xDB, 0xDF]  ## 'F'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xDB, 0xDB, 0xDF]  ## 'A'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xFF, 0xDB]  ## ':'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDB, 0xFF, 0xDB]  ## '0'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xDB, 0xFF, 0xDB]  ## '2'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xFF, 0xDB, 0xDB]  ## '\r'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xDB, 0xDB]  ## '\n'
+
+  - platform: template
+    name: 'Espresso small cup'
+    icon: "mdi:coffee"
+    id: small
+    on_press:
+      - uart.write: [0xFB, 0xDF, 0xDB, 0xDF]  ## 'F'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xDB, 0xDB, 0xDF]  ## 'A'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xFF, 0xDB]  ## ':'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDB, 0xFF, 0xDB]  ## '0'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDF, 0xFF, 0xDB]  ## '4'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xFF, 0xDB, 0xDB]  ## '\r'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xDB, 0xDB]  ## '\n'
+
+  - platform: template
+    name: 'Espresso normal cup'
+    icon: "mdi:cup"
+    id: normal
+    on_press:
+      - uart.write: [0xFB, 0xDF, 0xDB, 0xDF]  ## 'F'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xDB, 0xDB, 0xDF]  ## 'A'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xFF, 0xDB]  ## ':'
+      - delay: 8ms
+      - uart.write: [0xDB, 0xDB, 0xFF, 0xDB]  ## '0'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xDF, 0xFF, 0xDB]  ## '6'
+      - delay: 8ms
+      - uart.write: [0xDF, 0xFF, 0xDB, 0xDB]  ## '\r'
+      - delay: 8ms
+      - uart.write: [0xFB, 0xFB, 0xDB, 0xDB]  ## '\n'
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+text_sensor:  
+  - platform: template
+    id: status
+    name: "Status"
+    lambda: "return {};"
+
+binary_sensor:
+  - platform: template
+    id: tray
+    name: "Tray"
+    device_class: problem
+    lambda: "return {};"
+    filters:
+      - invert:
+
+  - platform: template
+    id: tank
+    name: "Water"
+    device_class: problem
+    lambda: "return {};"
+    filters:
+      - invert:
+
+  - platform: template
+    id: beans
+    name: "Beans"
+    device_class: problem
+    lambda: "return {};"
+    filters:
+      - invert:
+
+  - platform: template
+    id: pwr
+    name: "Power"
+    lambda: "return {};"
+    internal: true
+
+
+custom_component:
+- lambda: |-
+    auto my_jura = new JuraCoffee(id(uart_bus),id(tray),id(tank),id(beans),id(pwr),id(status));
+    App.register_component(my_jura);
+    return {my_jura};
